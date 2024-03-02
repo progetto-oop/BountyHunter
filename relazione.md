@@ -37,6 +37,12 @@
         - [Francesco Tonelli](#23-francesco-tonelli)
         - [Alessandro Buono](#24-alessandro-buono)
         - [Codice riadattato per la realizzazzione](#25-codice-riadattato-per-la-realizzazzione)
+    - [3. Codice Esterno](#3-codice-esterno)
+        - [Analisi Comune](#31-analisi-comune)
+        - [Fabio Fattori](#32-fabio-fattori-codice-esterno)
+        - [Mattia Senni](#33-mattia-senni-codice-esterno)
+        - [Francesco Tonelli](#34-francesco-tonelli-codice-esterno)
+        - [Alessandro Buono](#35-alessandro-buono-codice-esterno)
 - [Sviluppo ](#sviluppo)
     - [1. Testing Automatizzato ](#1-testing-automatizzato)
     - [2. Note di sviluppo ](#2-note-di-sviluppo)
@@ -752,6 +758,46 @@ per l'implementazione del l'A* path finder è stato utilizzato un utilizzato un 
 Prima di metterci a lavorare sul progetto Fabio Fattori e Mattia Senni hanno partecipato al seminario opzionale 'Game as a Lab' , dove il Professore Ricci ha spiegato come realizzare un gioco in Java , in particolare ha spiegato come realizzare un gioco in Java con il pattern ECS mostrandoci un esempio di gioco realizzato da lui stesso, quel codice alla fine del seminario ci è stato consegnato e noi lo abbiamo riadattato per realizzare il nostro gioco.
 Quindi difatto nel suo codice era presente una bozza di GameEngine , di World , di GameObject , di GraphicsComponent , di PhysicsComponent , di InputComponent , di Scene e di gestione degli eventi nel GameEngine , noi abbiamo preso queste bozze e le abbiamo riadattate per realizzare il progetto cercando ovviamente di capire il più possibile il codice che ci è stato consegnato.
 
+### 3. Codice Esterno
+
+#### 3.1 Analisi Comune
+
+Per creare il nostro gioco abbiamo prima di tutto svolto una fase di analisi per comprendere il codice e la struttura del gioco sviluppato sulla repository pubblica [Game as a lab](https://bitbucket.org/aricci303/game-as-a-lab/) directory “GAAL-Workspace/Game-As-A-Lab-Step-09-multiple-balls”.
+Dopo un’attenta fase di analisi del codice abbiamo deciso di adottarne la struttura nel progetto (che seguiva il pattern ECS: Entity Component System) in quanto ci sembrava molto ben separata e solida.
+Abbiamo deciso oltre alla struttura di mantenere nel nostro progetto alcune classi e interfacce che potessero esserci utili.
+In particolare abbiamo deciso di tenere il Game engine con la logica del game loop e la gestione degli eventi, la Swing Scene e SwingGraphics con la logica di key handling e di disegno della finestra, il Game State, il World, il Game Factory, e tutte le interfacce / classi da estendere che dettavano la struttura di base del progetto quali GraphicsComponent , PhysicsComponent , InputComponent, GameObject.
+Ognuna di queste interfacce / classi è stata parzialmente ed in alcuni casi totalmente modificata a seconda delle nostre necessità.
+
+#### 3.2 Fabio Fattori Codice Esterno
+
+Ho modificato swing scene per poter utilizzare al meglio il Resizator il quale ogni volta che si verifica il resize dello schermo, fa il resize di tutti gli asset e tutte le dimensioni del gioco.
+Inoltre per realizzare player, minimappa, inventario e quest ho utilizzato Game Object, Input component, graphics component e physics component.
+Il movimento del giocatore e l’apertura / chiusura di minimappa e inventario è implementato grazie al key handler dello swing scene.
+Tutti questi elementi sono stati aggiunti all’interno del world e sono creati dal game factory.
+Ho inoltre modificato lo swing scene per disegnare diversi elementi a seconda se il player è nell’hub o nell’open world.
+Infine ho utilizzato il gestore di eventi del game engine per gestire ad esempio il game over, il cambio di mappa, l’assegnamento di dobloni alla morte di un nemico e l'assegnazione delle quest.
+
+
+#### 3.3 Mattia Senni Codice Esterno
+
+Ho utilizzato la rect bounding box e la circle bounding (di game as lab, opportunamente modificate) per creare i metodi che controllavano le collisioni, rect bounding box e circle bounding box sono stati inoltre utilizzati per dare una forma al boss e ai nemici, per definire le dimensioni dei tile in modo da utilizzare il controllo delle collisioni ed insieme a Point2d per determinare la corretta posizione degli elementi nella Camera.
+L’utilizzo anche di Point2d (insieme alle box) per creare il path finding.
+Inoltre i nemici ed il boss sono dei GameObject, ed utilizzano un Graphics Component per farli disegnare, un Physics Component per controllare le collisioni ed un Input Component per aggiornare il loro movimento (Che utilizza Vector2d per la velocità).
+Ho utilizzato e modificato il world per aggiungere le entità dei nemici e del boss.
+
+
+#### 3.4 Francesco Tonelli Codice Esterno
+
+Ho aggiunto numerosi metodi in SwingGraphics per disegnare alcune entità e interfacce del gioco (drawPlayer, drawBlacksmithPanel, drawBlacksmithButtons, tutti i drawEnemy, drawWeaponIcon, drawDurabilityBar…), modificando anche metodi degli altri quando si è trattato di rendere scalabile, per esempio, il pannello delle quest. Ho modificato SwingScene per far riprodurre le musice e, appoggiandomi a SwingGraphics, disegnare il fabbro e l’hud. Ho aggiunto il metodo createBlacksmithForHub in GameFactory, e ho modificato la classe PlayerInputController, che implementa InputController, per cambiare la direzione del player e far quindi variare le animazioni.
+
+#### 3.5 Alessandro Buono Codice Esterno
+
+SwingScene: Inserimento di un più efficiente metodo di gestire gli input dei vari tasti e le funzioni ad essi collegati nell’interfaccia e nelle altre classi (PlayerInputController, PlayerInputComponent, InputController, KeyboardInputController) per attacchi e movimento sia nei casi di pressione che di rilascio per ogni caso utile.
+
+GameFactory: Inserito il metodo per creare l’oggetto di base per l’utilità usato nel combattimento (WeaponDamagingArea), poi modificato altri factory base in cui venivano creati i personaggi o i nemici per dare l’equipaggiamento di base.
+Toccato anche gli update vari per tutti gli oggetti creati.
+
+
 # Commenti Finali 
 
 ### 1. Autovalutazione e Lavori Futuri 
@@ -777,8 +823,10 @@ Le difficoltà più grandi che ho dovuto affrontare sono state sicuramente la sc
 
 #### 2.4 Alessandro Buono Autovalutazione
 
-È stata una grande sfida lavorare ad un progetto con altre persone, le corse critiche sono sempre molto difficili da risolvere.
-ERROR 404 - CONTENT NOT FOUND - err.220774
+In questo progetto mi sono concentrato soprattutto sulla parte di “ottimizzazione” e di programmazione a livello più meccanico.
+Ho dovuto fare cose semplici sulla carta, ma comunque molto dispendiose a livello mentale poiché avendo molti modi per implementarlo bisogna trovare il modo migliore che si incastri meglio nella struttura generale del codice pensando anche a come si svilupperà tutto il progetto.
+È stato un po' complicato coordinarsi con i bisogni di tutti, ma alla fine ci siamo riusciti a trovare ed è stato molto istruttivo soprattutto sul come gestire certe situazioni più critiche
+
 
 
 # Guida Utente 
