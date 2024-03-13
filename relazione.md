@@ -768,6 +768,37 @@ Abbiamo deciso oltre alla struttura di mantenere nel nostro progetto alcune clas
 In particolare abbiamo deciso di tenere il Game engine con la logica del game loop e la gestione degli eventi, la Swing Scene e SwingGraphics con la logica di key handling e di disegno della finestra, il Game State, il World, il Game Factory, e tutte le interfacce / classi da estendere che dettavano la struttura di base del progetto quali GraphicsComponent , PhysicsComponent , InputComponent, GameObject.
 Ognuna di queste interfacce / classi è stata parzialmente ed in alcuni casi totalmente modificata a seconda delle nostre necessità.
 
+Analisi file
+
+Legenda
+- `Riscritto`: la classe è stata totalmente riscritta, sono rimasti solo eventuali nomi di metodi e classi
+- `Modificato`: la classe è stata per la maggior parte riscritta pur mantenendo i nomi dei metodi, e/o sono stati aggiunti metodi integrativi
+- `Parzialmente Modificato`: la classe è stata in parte riscritta pur mantenendo i nomi dei metodi, e/o sono stati aggiunti metodi integrativi
+- `Uguale`: la classe è stata mantenuta invariata dalla risorsa esterna presa
+
+|File|Stato|Descrizione|
+|----|-----|-----------|
+|P2d |Modificato |Aggiunte molte funzionalità e operazioni possibili sui punti (tenute proprietà x e y con i relativi setter)|
+|V2d |Modificato |Aggiunte funzionalità e operazioni possibili sui vettori (tenute proprietà x e y con i relativi setter)|
+|GameEngine |Modificato |Aggiunto logging, aggiornato il gestore di eventi, aggiunta logica di game over (tenuto solamente codice per game loop e lista di eventi)|
+|GameFactory |Riscritto |Classe che contiene tutti i metodi per creare gli elementi del gioco |
+|Graphics |Riscritto |Classe che contiene l'interfaccia della classe che dovrà contenere i metodi per disegnare ogni entità del gioco|
+|GraphicsComponent |Modificato |modificato la firma di un metodo dell'interfaccia |
+|Scene |Modificato |Aggiunti 2 metodi all'interfaccia per gestire altri scenari presenti nel nostro gioco |
+|SwingGraphics |Riscritto |Riscritto il sistema di gestione delle coordinate, e tutti i metodi di disegno nella grafica degli elementi |
+|SwingScene |Modificato |Riscritto il keyHandler, Riscritta la gestione delle dimensione della finestra per gestire il resize, riscritto il sistema di gestione delle coordinate del gioco (sono state tenute le firme dei metodi)|
+|InputComponent |Modificato |modifica la firma del metodo dell'interfaccia |
+|KeyboardInputController |Modificato |Aggiunta la gestione di tutti i tasti utili al gioco |
+|NullInputComponent |Modificato |Adattato alla nuova interfaccia |
+|BoundingBox |Modificato |Aggiunta di metodi ritenuti utili al fine del controllo di collisioni all'interfaccia |
+|CircleBoundingBox |Uguale |Era ritenuta utile al fine di controllare le collisioni, non è successivamente stata utilizzata |
+|GameObject |Parzialmente Modificato |Aggiunti alcune getter e setter, viene utilizzata per essere estesa da altri model che ne daranno funzionalità utili al gioco|
+|RectBoundingBox |Modificato |Modificato il funzionamento, prima voleva due punti ora un punto con larghezza e lunghezza, aggiunti metodi di gestione |
+|PhysicsComponent |Uguale |classe astratta contente un metodo che poi verrà sovrascritto per creare componenti fisici personalizzati |
+|World |Modifica |Il world è stato gestito da game as a Lab come un raccoglitore di GameObjects , noi oltre a questo lo cambiamo in base al mondo in cui è il player, cambiamento dato dal fatto che il player entra nel Teleporter |
+|WorldEvent |Uguale |dato che è una interfaccia vuota che serve solo per avere una lista di eventi comuni in World |
+|WorldEventListener |Uguale |Interfaccia per segnalare un game event |
+
 #### 3.2 Fabio Fattori Codice Esterno
 
 Ho modificato swing scene per poter utilizzare al meglio il Resizator il quale ogni volta che si verifica il resize dello schermo, fa il resize di tutti gli asset e tutte le dimensioni del gioco.
