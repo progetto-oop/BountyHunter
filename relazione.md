@@ -798,6 +798,11 @@ Legenda
 |World |Modifica |Il world è stato gestito da game as a Lab come un raccoglitore di GameObjects , noi oltre a questo lo cambiamo in base al mondo in cui è il player, cambiamento dato dal fatto che il player entra nel Teleporter |
 |WorldEvent |Uguale |dato che è una interfaccia vuota che serve solo per avere una lista di eventi comuni in World |
 |WorldEventListener |Uguale |Interfaccia per segnalare un game event |
+|GameObjectType |Riscritto |Enum con tutte le entità del gioco |
+
+Legenda delle tabelle dei file creati da ogni componente del gruppo
+- `Classe`: La classe creata
+- `Collaboratore`: compagno che ha fatto modifiche significative alla classe
 
 #### 3.2 Fabio Fattori Codice Esterno
 
@@ -808,6 +813,38 @@ Tutti questi elementi sono stati aggiunti all’interno del world e sono creati 
 Ho inoltre modificato lo swing scene per disegnare diversi elementi a seconda se il player è nell’hub o nell’open world.
 Infine ho utilizzato il gestore di eventi del game engine per gestire ad esempio il game over, il cambio di mappa, l’assegnamento di dobloni alla morte di un nemico e l'assegnazione delle quest.
 
+|File |Collaboratori |
+|----|----|
+|Quest.java | |
+|QuestPannel.java | |
+|QuestEntity.java | |
+|Teleporte.java | |
+|LoadingBar.java | |
+|InterractableArea.java | |
+|HealthBar.java | |
+|KilledEnemyEvent.java | |
+|PlayerEntity.java |Francesco Tonelli |
+|ChangeWorldEvent.java | |
+|PlayerPhysicsComponent.java | |
+|TeleporterPhysicsComponent.java | |
+|InventoryObject.java | |
+|MiniMapInputController.java | |
+|FighterEntity.java |Francesco Tonelli |
+|PlayerInputController.java |Francesco Tonelli , Alessandro Buono |
+|TeleporterGraphicComponent.java | |
+|LoadingBarGraphicsComponent.java | |
+|HealthBarGraphicsComponent.java | |
+|InventoryGraphycsComponent.java | |
+|MiniMapGraphicsComponent.java | |
+|AreaInMapGraphicsComponent.java | |
+|Resizator.java | |
+|HidableObject.java | |
+|DestinationOfTeleporterType.java | |
+|WeaponGraphicComponent.java| |
+|PlayerIsDeadEvent.java| |
+
+
+
 
 #### 3.3 Mattia Senni Codice Esterno
 
@@ -816,10 +853,58 @@ L’utilizzo anche di Point2d (insieme alle box) per creare il path finding.
 Inoltre i nemici ed il boss sono dei GameObject, ed utilizzano un Graphics Component per farli disegnare, un Physics Component per controllare le collisioni ed un Input Component per aggiornare il loro movimento (Che utilizza Vector2d per la velocità).
 Ho utilizzato e modificato il world per aggiungere le entità dei nemici e del boss.
 
+File Creati
+|Classe|Collaboratore|
+|------|--------|
+|AppLogger| |
+|Logger| |
+|LoggerImpl| |
+|LogType| |
+|AssetImage| |
+|ExponentialProbability| |
+|FileProvider| |
+|ImagePathProvider |Francesco Tonelli, Fabio Fattori |
+|ImageType |Francesco Tonelli |
+|Pair | |
+|PercentageHelper| |
+|Probability| |
+|WinnerType| |
+|EnemyGraphicsComponent| |
+|MapGraphicsComponent| |
+|Camera |Fabio Fattori |
+|NavigatorLine| |
+|SceneCamera|Fabio Fattori |
+|SwingAssetProvider| |
+|WizardBossGraphicsComponent| |
+|EnemyInputController| |
+|Tutti i file nella cartella model/AI (18)| |
+|Tutti i file nella cartella model/EnemyManger (2)| |
+|EnemyEntity| |
+|CollisionDetector| |
+|Tile| |
+|TileManager| |
+|GameOverEvent| |
+|FighterEntityType| |
+|NavigatorLine| |
+|TileType |Fabio Fattori |
+|WizardBossEntity| |
+|EnemyPhysicsComponent| |
+|WizardBossPhysicsComponent| |
 
 #### 3.4 Francesco Tonelli Codice Esterno
 
 Ho aggiunto numerosi metodi in SwingGraphics per disegnare alcune entità e interfacce del gioco (drawPlayer, drawBlacksmithPanel, drawBlacksmithButtons, tutti i drawEnemy, drawWeaponIcon, drawDurabilityBar…), modificando anche metodi degli altri quando si è trattato di rendere scalabile, per esempio, il pannello delle quest. Ho modificato SwingScene per far riprodurre le musice e, appoggiandomi a SwingGraphics, disegnare il fabbro e l’hud. Ho aggiunto il metodo createBlacksmithForHub in GameFactory, e ho modificato la classe PlayerInputController, che implementa InputController, per cambiare la direzione del player e far quindi variare le animazioni.
+
+|File |Collaboratori |
+|----|----|
+|PlayerGraphicsComponent |Fabio Fattori |
+|BlackSmithPanelGraphicsComponent | |
+|Blacksmith | |
+|BlacksmithEntity | |
+|BlacksmithPanel | |
+|MusicPlayer | |
+|MusicPlayerImpl | |
+|Direction | |
 
 #### 3.5 Alessandro Buono Codice Esterno
 
@@ -828,6 +913,12 @@ SwingScene: Inserimento di un più efficiente metodo di gestire gli input dei va
 GameFactory: Inserito il metodo per creare l’oggetto di base per l’utilità usato nel combattimento (WeaponDamagingArea), poi modificato altri factory base in cui venivano creati i personaggi o i nemici per dare l’equipaggiamento di base.
 Toccato anche gli update vari per tutti gli oggetti creati.
 
+- MeleeWeapon
+- RangedWeapon
+- Weapon
+- WeaponFactory
+- WeaponType
+- DamagingArea
 
 # Commenti Finali 
 
