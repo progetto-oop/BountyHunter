@@ -524,7 +524,25 @@ EnemyRegistry --> EnemyEntity : enemies[]
 
 **Soluzione** : L'HUD viene stampata tutta in SwingScene, facendo uso di SwingGraphics e Graphics2d. Ho riutilizzato una vecchia healthBar che avevamo creato per il testing, l'ho riadattata, e poi ho aggiunto, rendendo scalabile, il display dell'arma equipaggiata, l'eventuale durabilità, i dobloni del giocatore e le sue munizioni. Il tutto è disegnato utilizzando varie proporzioni delle dimensioni del frame.
 
-![no UML found](./relazioniImgs/hud_diagram.png "4.3 Diagramma UML che descrive come è stato implementato l'HUD")
+![no UML found](./relazioniImgs/hud_diagram.png "4.4 Diagramma UML che descrive come è stato implementato l'HUD")
+
+**Problema** : Al posto di dare dei dobloni al player, dopo la morte di ogni nemico questi rilascia per terra dei drop che il giocatore può raccogliere
+
+**Soluzione** : Il World adesso possiede un ConsumableManager, che gestisce tutti i drop nel mondo di gioco, creandoli, utilizzandoli ed eliminandoli. Il manager possiede quindi una lista di Consumable, classe astratta che viene estesa da DropDoblonsGiver (che, se raccolto, da un doblone al giocatore), DropAmmoGiver (che da 3 munizioni) e DropHealthGiver (che cura istantaneamente il giocatore). Per questi consumabili sono stati sviluppati un componente per la fisica (ConsumablePhysicsComponent, che attiva il consumabile quando viene raggiunto dal giocatore), uno per la grafica (ConsumablesGraphicsComponent, che rende possibile disegnarlo) e una classe per disegnarli (ConsumableGraphics, che viene richiamata da SwingGraphics quando vanno disegnati a schermo).
+
+![no UML found](./relazioniImgs/drop_diagram.png "4.5 Diagramma UML che descrive come sono stati implementati i drop")
+
+**Problema** : Aggiungere un modo per potenziare il giocatore durante la partita
+
+**Soluzione** : Estendendo Consumable, sono stati creati PowerUpDamage (aumenta il danno inflitto per 10 secondi), PowerUpSpeed (aumenta la velocità per 10 secondi) e PowerUpDurability (ripara l'arma del giocatore). Questi power up sono gestiti sempre dal ConsumableManager, che si occupa di crearne 100 nel mondo, poi li attiva come i drop, e si occupa anche di disattivare quelli a tempo dopo il loro funzionamento. Per stamparli e gestirli vengono sempre usati ConsumablePhysicsComponent, ConsumablesGraphicsComponent e ConsumableGraphics.
+
+![no UML found](./relazioniImgs/powerup_diagram.png "4.6 Diagramma UML che descrive come sono stati implementati i power up")
+
+**Problema** : Aggiungere il gioco del pong come minigame nella HUB
+
+**Soluzione** : Nella HUB è adesso presente una nuova InterractableArea, ovvero una PongEntity. Questa possiede un PongPanel, che contiene i tre oggetti di gioco (racchette e palla), disegnati come PongObjects. Un PongObject contiene la sua posizione, le sue due dimensioni e la velocità di spostamento, e può restituire le cordinate dei suoi lati, per rendere più pulito il calcolo delle collisioni. Il PongPanel contiene la divisione in segmenti del campo da gioco, i tre oggetti e il vettore direzionale della palla, e offre i metodi per spostare i vari oggetti di gioco. PongPanel utilizza PongPhysicsComponent per controllare le collisioni della palla e per farla muovere di conseguenza, aumentandone anche la velocità, PongPanelGraphicsComponent (che richiama SwingGraphics, nel quale sono stati inseriti appositi metodi) per stampare e aggiornare la schermata, e PongInputComponent per far muovere la racchetta del giocatore tramite input da tastiera. PongInputComponent possiede inoltre un AIPong, ovvero un oggetto che muove la racchetta dell'avversario (la logica di questa AI segue la palla). PongEntity si occupa infine di sottrarre o aggiungere dobloni al giocatore, in base all'aver subito o l'aver segnato un punto.
+
+![no UML found](./relazioniImgs/pong_diagram.png "4.7 Diagramma UML che descrive come è stato implemetato il pong")
 
 #### 2.4 Alessandro Buono
 
@@ -532,11 +550,10 @@ EnemyRegistry --> EnemyEntity : enemies[]
 
 **Soluzione** : Modificando l'interfaccia precedentemente implementata "InputController" mi sono adattato al pattern già utilizzato inserendo però varie funzioni per migliorare la logica e la leggibilità del codice.
 L'utilizzo di variabili di stato ha permesso al codice di essere flessibile ed adattabile a varie modifiche sulle interazioni fondamentali che il personaggio ha con gli input, per esempio se il personaggio si può muovere in più direzioni contemporaneamente o se il suo movimento è interrotto se si sta eseguendo un attacco, tutte cose facilmente comprensibili e modificabili nel codice.
-Ho fatto in modo che ci sia un timer adattivo in modo da gestire l'attack speed come il numero di attacchi al secondo e così il programma nel lasso di tempo in cui il timer è > 0, ignora completamente i segnali in entrata dalle frecce 
+Ho fatto in modo che ci sia un timer adattivo in modo da gestire l'attack speed come il numero di attacchi al secondo e così il programma nel lasso di tempo in cui il timer è > 0, ignora completamente gli input in entrata.
 
-**Pattern usato** : ECS (Entity Component System)
+```mermaid
 
-```
 classDiagram
     class PlayerInputController {
         - double timer
@@ -571,21 +588,23 @@ classDiagram
     PlayerInputController -->InputController 
     PlayerInputController -->PlayerEntity 
     PlayerEntity -->WeaponDamagingArea
+    
 ```
 
 
 **Problema** : Gestione delle hitbox degli attacchi
 
-**Soluzione** : Risolto impostatando le hitbox come un "HideableObject" in modo da poterne controllare lo stato ed in caso di necessità disattivarlo e poterne cambiarne direzione e dimensione comodamente, questi Object possono interagire con le BBox dei nemici per generare degli eventi alla sovrapposizione, dando effettivamente vita a questo gioco.
+**Soluzione** : Risolto impostatando le hitbox come un "HideableObject" in modo da poterne controllare lo stato ed in caso di necessità disattivarlo e poterne cambiare la direzione e dimensione comodamente, questi Object possono interagire con le BBox dei nemici per generare degli eventi alla sovrapposizione, dando effettivamente vita a questo gioco.
 
 
 **Problema** : Implementazione delle Armi
 
-**Soluzione** : Risolto con dell'ereditarietà standard per minimizzare il riciclo di codice  e permettere a tutte le classi figlie durante tutto il processo della creazione delle armi è risultato molto utile avere certi campi salvati in molteplici oggetti, così da rendere tutto il development più fluido e soprattutto comprensibile.
+**Soluzione** : Risolto con dell'ereditarietà standard per minimizzare la ripetizione del codice e permettere a tutte le classi figlie durante tutto il processo della creazione delle armi è risultato molto utile avere certi campi salvati in molteplici oggetti, così da rendere tutto il development più fluido e soprattutto comprensibile.
 Spesso può sembrare inutile o subottimale, ma può rispariare tanto tempo quando si cercano dei campi specifici o quando si cerca di risalire ad un errore.
 È molto importante però anche considerare il modo in cui i compagni di progetto concepiscono e progettano il codice, perché fare del codice comprensibile per se stessi non vuol dire sempre fare del codice comprensibile per tutti.
 
-```
+```mermaid
+
 classDiagram
     class WeaponFactory {
         - WeaponFactory instance
@@ -668,11 +687,124 @@ classDiagram
     MeleeWeapon ..> FighterEntity
     RangedWeapon ..> FighterEntity
     RangedWeapon --> Bullet : has
+
 ```
 
-**Problema** : Necessità di dare un tipo diverso a stesse istanze di Weapon
+**Problema** : Rendere costante il ciclarsi della SlotMachine e metterlo in pausa durante la rivelazione del risultato
 
-**Soluzione** : Creato un ENUM per permettere a svariati altri metodi di capire direttamente la tipologia delle armi riassumendo così molteplici righe di codice e soprattutto rendere molto più facile la gestione degli sprite, soprattutto perché per armi di stessa istanza di weapon non erano riconoscibili avendo un oggetto weapon.
+**Soluzione** : Per ottenere l'effetto di costante variazione della slot machine ho dovuto trovare un elemento che venisse richiamato ripetutamente solo mentre la finestra era aperta.
+Piuttosto che fare delle lunghissime chiamate nel GameLoop ho risolto utilizzando l'imput component che non avrei utilizzato per la SlotMachine visto che l'unica interazione col player è un singolo bottone.
+Utilizzando l'inputComponent per quello ho potuto creare praticamente un "mini loop" personalizzato con a disposizione tutti campi della Board e della SlotMachine in maniera più chiara e leggibile, mantenendo però la frequenza delle chiamate del metodo "update".
+Il fattore random è stato implementato con un array (coll) con tutti i tipi possibili, per poi associarli ad ogni casella della board con un Rand.
+
+```mermaid
+
+classDiagram
+    class SlotMachineBoard {
+        -SlotMachineTilesTypes[] coll
+        -SlotMachineTilesTypes[][] arr
+        +SlotMachineBoard(type, pos, vel, box, input, graph, phys, show)
+        +void roll()
+        +ImageType[][] getTileImages()
+        +SlotMachineTilesTypes[][] getyDisplayedTipes()
+        +boolean play(player)
+
+    }
+
+    class SlotMachineInputComponent {
+        void update
+    }
+    
+    class SlotMachine {
+        +void roll()
+        +boolean play()
+        +WinCategories win()
+        +HidableObject getPanel()
+    }
+
+    class SlotMachineEntity{
+        - PlayerEntity player
+        - SlotMachineBoard board
+    }
+    
+    class WinCategories {
+        <<enumeration>>
+        -Lose
+        -DoubleRefund
+        -QuintupleRefund
+        -SmallWin
+        -BigWin
+        -Jackpot
+    }
+
+    class SlotMachineTilesTypes {
+        <<enumeration>>
+        -zombie
+        -skelly
+        -knight
+        -wizard
+        -doblon
+        -hammer
+    }
+    class HidableObject
+    class InterractableArea
+
+    SlotMachineEntity --|> InterractableArea :Extends
+    SlotMachineEntity *-- SlotMachineBoard :Contains
+    SlotMachineEntity *-- SlotMachineInputComponent :Contains
+    SlotMachineEntity ..> SlotMachine : Implements
+    SlotMachineBoard --> HidableObject :Extends
+    SlotMachineBoard *-- PlayerEntity :Contains
+
+```
+
+**Problema** : Aggiungere delle armi a runtime al Player
+
+**Soluzione** : Purtroppo un muro che ho riscontrato è stato il fatto che l'inventario e la lista dei pulsanti esistenti nell'inventario (sia quantità che tipo) è stabilita subito dopo che il player è creato appena si trova nell'Hub per la prima volta e mai più, per questo ho deciso di optare per una soluzione più terra terra.
+Al player ho dato a disposizione tutte le armi quando viene creato, ma i pulsanti con quelle acquistabili sono nascosti, ed essi vengono rivelati dopo che sono state acquistate effettivamente.
+
+
+```mermaid
+
+classDiagram
+    class Merchant {
+        +int getUpgradeArmourCost()
+        +int getUpgradeDamageCost()
+        +void updateUpgradeArmourCost()
+        +void updateUpgradeDamageCost()
+    }
+
+    class MerchantEntity {
+        +MerchantEntity(type, pos, vel, box, menu)
+        +int getUpgradeArmourCost()
+        +int getUpgradeDamageCost()
+        +void updateUpgradeArmourCost()
+        +void updateUpgradeDamageCost()
+    }
+
+    class MerchantMenu {
+        -int upgradeArmourCost
+        -int upgradeDamageCost
+        +MerchantMenu(type, pos, vel, box, input, graph, phys, show, player)
+        +int getUpgradeArmourCost()
+        +int getUpgradeDamageCost()
+        +void updateUpgradeArmourCost()
+        +void updateUpgradeDamageCost()
+        +boolean upgradeArmour()
+        +boolean upgradeDamage()
+        +boolean buyNewWeapon()
+    }
+
+    class HidableObject
+    class InterractableArea
+
+    MerchantEntity --|> InterractableArea :Extends
+    MerchantEntity --* Merchant :Implements
+    MerchantEntity *-- MerchantMenu :Contains
+    MerchantMenu --|> HidableObject :Extends
+     MerchantMenu *-- PlayerEntity :Contains
+
+```
 
 
 # Sviluppo
@@ -748,10 +880,22 @@ per l'implementazione del l'A* path finder è stato utilizzato un utilizzato un 
     Usate per lo sviluppo del fabbro nella classe SwingScene. Permalink: https://github.com/progetto-oop/OOP23-BountyHunter/blob/75c21c3c431681794c9b95293f02a4e8c649c342/app/src/main/java/buontyhunter/graphics/SwingScene.java#L153C4-L153C11
 
 **Utilizzo di javax.sound.sampled** (non spiegata a lezione):
-    Usata per la riproduzione delle tracce mumsicali durante il gameplay in MusicPlayer. Permalink: https://github.com/progetto-oop/OOP23-BountyHunter/blob/75c21c3c431681794c9b95293f02a4e8c649c342/app/src/main/java/buontyhunter/model/MusicPlayerImpl.java#L16
+    Usata per la riproduzione delle tracce musicali durante il gameplay in MusicPlayer. Permalink: https://github.com/progetto-oop/OOP23-BountyHunter/blob/75c21c3c431681794c9b95293f02a4e8c649c342/app/src/main/java/buontyhunter/model/MusicPlayerImpl.java#L16
+
+**[Extended] Utilizzo di Stream**:
+    Utilizzati diverse volte per gestire le liste di consumabili nel ConsumableManager e nel World (getSceneEntities) e la lista di InterractableArea per trovare la PongEntity in World (updateState), in PLayerInputController (instanceAttack) e in SwingGraphics (drawPongIcon). Il permalink presenta un esempio creato per i consumabili. Permalink: https://github.com/FrancescoTonelli/OOP23-BountyHunter-Extended/blob/609593f636d23de3f7c196b15154951457fffdc4/src/main/java/buontyhunter/model/consumables/ConsumableManagerImpl.java#L72
 
 #### 2.4 Alessandro Buono Sviluppo
 
+**Utilizzo di JButton**
+
+**Utilizzo di Stream**: 
+    Usate in SwingGraphics/Scene per filtrare le varie possibili istanze di HidableObject e InteractableArea. Quello riportato è un singolo esempio presente nella classe SwingGraphics.
+    Permalink: https://github.com/FrancescoTonelli/OOP23-BountyHunter-Extended/blob/ffb3303ff0c3482d85dc769082132c7df5c7123a/src/main/java/buontyhunter/graphics/SwingGraphics.java#L981
+
+**Utilizzo di Lambda Expressions**: 
+    Usate combinazione con gli Stream per filtrare Gli oggetti sopra citati.Esempio nella classe SwingScene .
+    Permalink: https://github.com/FrancescoTonelli/OOP23-BountyHunter-Extended/blob/ffb3303ff0c3482d85dc769082132c7df5c7123a/src/main/java/buontyhunter/graphics/SwingScene.java#L185
 
 #### 2.5 Codice riadattato per la realizzazzione
 
@@ -906,19 +1050,51 @@ Ho aggiunto numerosi metodi in SwingGraphics per disegnare alcune entità e inte
 |MusicPlayerImpl | |
 |Direction | |
 
+|File Extended|
+|----|
+|ConsumableGraphics|
+|ConsumableGraphicsImpl|
+|ConsumablesGraphicsComponent|
+|PongPanelGraphicsComponent|
+|PongInputComponent|
+|ConsumableGraphicsImpl|
+|AIPong|
+|AIPongImpl|
+|Consumable|
+|ConsumableManager|
+|ConsumableManagerImpl|
+|DropAmmoGiver|
+|DropDoblonsGiver|
+|DropHealthGiver|
+|PowerUpDamage|
+|PowerUpDurability|
+|PowerUpSpeed|
+|Pong|
+|PongEntity|
+|PongObject|
+|PongPanel|
+|PongPhysicsComponent|
+
 #### 3.5 Alessandro Buono Codice Esterno
 
 SwingScene: Inserimento di un più efficiente metodo di gestire gli input dei vari tasti e le funzioni ad essi collegati nell’interfaccia e nelle altre classi (PlayerInputController, PlayerInputComponent, InputController, KeyboardInputController) per attacchi e movimento sia nei casi di pressione che di rilascio per ogni caso utile.
 
-GameFactory: Inserito il metodo per creare l’oggetto di base per l’utilità usato nel combattimento (WeaponDamagingArea), poi modificato altri factory base in cui venivano creati i personaggi o i nemici per dare l’equipaggiamento di base.
-Toccato anche gli update vari per tutti gli oggetti creati.
+GameFactory: Inserito il metodo per creare l’oggetto di base per l’utilità usato nel combattimento (WeaponDamagingArea).
 
-- MeleeWeapon
-- RangedWeapon
-- Weapon
-- WeaponFactory
-- WeaponType
-- DamagingArea
+Weapon
+
+File Creati
+|Classe|
+|------|
+|MerchantMenuGraphicsComponent| |
+|SlotMachineBoardGraphicsComponent| |
+|WeaponGraphicsComponent| |
+|SlotInputController| |
+|Armour| |
+|Tutti i file in merchantClasses (3)| |
+|Tutti i file in slotMachineClasses (5)| |
+|Tutti i file in weaponClasses (5)| |
+
 
 # Commenti Finali 
 
@@ -946,8 +1122,9 @@ Le difficoltà più grandi che ho dovuto affrontare sono state sicuramente la sc
 #### 2.4 Alessandro Buono Autovalutazione
 
 In questo progetto mi sono concentrato soprattutto sulla parte di “ottimizzazione” e di programmazione a livello più meccanico.
-Ho dovuto fare cose semplici sulla carta, ma comunque molto dispendiose a livello mentale poiché avendo molti modi per implementarlo bisogna trovare il modo migliore che si incastri meglio nella struttura generale del codice pensando anche a come si svilupperà tutto il progetto.
-È stato un po' complicato coordinarsi con i bisogni di tutti, ma alla fine ci siamo riusciti a trovare ed è stato molto istruttivo soprattutto sul come gestire certe situazioni più critiche
+Ho dovuto fare cose semplici sulla carta, ma comunque molto dispendiose a livello logico poiché avendo molti modi per implementarlo bisogna trovare il modo che si incastri meglio nella struttura generale del codice pensando anche a come si svilupperà tutto il progetto e facendo in modo che sia comunque leggibile, modificabile ed aggiornabile facilmente.
+È stato un po' complicato coordinarsi con i bisogni di tutti, ma alla fine ci siamo riusciti a trovare ed è stato molto istruttivo soprattutto sul come gestire certe situazioni critiche.
+In futuro vorrei gestire meglio tutta la parte delle armi ranged separando i Bullet, rendendoli indipendenti in modo da poterli gestire più facilmente.
 
 
 
@@ -966,25 +1143,49 @@ Ho dovuto fare cose semplici sulla carta, ma comunque molto dispendiose a livell
 - I per aprire e chiudere l'inventario
 
 # Combattimento
-- freccette per attaccare nella direzione corrispondente alla freccetta premuta
+- premere le frecce direzionali per attaccare nella direzione corrispondente alla freccia premuta
 
-# Interazione con il fabbro , con il pannel delle quest e con il pannello dell'inventario
-- per interagire con il fabbro , con il pannel delle quest e con il pannello dell'inventario bisogna avvicinarsi e premere E
-- per chiudere il pannel delle quest e il pannello dell'inventario bisogna premere E oppure allontanarsi dalla zona interagibile
-- per eseguire qualsiasi azione nel pannello che si apre a schermo bisogna utilizzare il mouse e cliccare sui bottoni
+# Interazione con il Fabbro, con il Mercante , con il panel delle quest e con il pannello dell'inventario
+- per interagire con il Fabbro, con il Mercante o con il panel delle quest bisogna avvicinarsi e premere E
+- per chiudere il pannello del Fabbro, il Mercante o il panel delle quest si può premere ancora E oppure allontanarsi dalla zona interagibile con WASD
+- per aprire il pannello dell'inventario bisogna premere I
+- per chiudere il pannello dell'inventario bisogna premere nuovamente I
+- per eseguire qualsiasi azione nei vari pannelli che si aprono a schermo bisogna utilizzare il mouse e cliccare sui bottoni
+
     # ESEMPI
+
     - per accettare una missione bisogna cliccare su essa con il mouse
     - per equipaggiare un'arma bisogna cliccare su di essa con il mouse
-    - per riparare l'arma equipaggiata bisogna cliccare sull'icona del martello , le armi riparabili sono quelle che hanno la barra della durabilità non piena , quindi le spade
-    - per comprare le munizioni dell'arco bisogna cliccare sull'icona della freccia con l'arco equipaggiato
+    - per riparare l'arma equipaggiata bisogna cliccare sull'icona del martello , le armi riparabili sono quelle che hanno la barra della durabilità non piena , quindi le armi corpo a corpo, come la spada
+    - per comprare le munizioni bisogna cliccare sull'icona della freccia con un arma da distanza equipaggiata
+    - per migliorare l'armatura ed il moltiplicatore del danno bisogna premere sui rispettivi tasti del mercante (il primo upgrade dell'armatura è gratuito)
+    - ogni upgrade dell'armatura costerà 50 in più rispetto al precedente, invece quello del danno costerà 100 in più rispetto al precedente
+    - si possono vedere la riduzione del danno ed il moltiplicatore del danno nell'inventario sopra alla vita, invece il livello dell'armatura è sempre riportato in basso a sinistra affianco alla rispettiva icona
 
 # missioni nel Hub
 
 - per accettare una missione bisogna cliccare su di essa con il mouse dopo averla aperta nell'hub
+
+# Pong minigame
+
+- una volta interagito con l'icona nell'hub, usare le frecce direzionali in alto e in basso per comandare la racchetta
+- ogni punto segnato premierà il giocatore con 3 dobloni
+- ogni punto subito sottrarrà un doblone al giocatore (se il giocatore non ne possiede, non succederà nulla)
+
+# SlotMachine
+
+- dopo aver aperto la board interagendo con la SlotMachine nell'Hub si potrà tentare la fortuna premendo il tasto "play"
+- ogni giocata osterà al giocatore 5 dobloni
+- dopo aver giocato con successo la slot si fermerà per circa 5 secondi per permettere di visionare il risultato al giocatore, dopo questo lasso di tempo la slot ripartirà automaticamente e si potrà giocare nuovamente
+- ogni combinazione unica ha un reward diverso che varia da 10 a 1000 dobloni
+- il gioco è completamente random
+- consigliato solo alle persone con 18 anni o più, giocare con prudenza, potrebbe creare dipendenza
 
 # Dinamiche di gioco
 
 - lo scopo del gioco è uccidere più nemici possibili ed il boss
 - il boss è segnalato da un pallino viola sulla mappa, inseguilo per ucciderlo
 - una volta ucciso il boss, si rigenererà con il doppio della potenza
-- il giocoo andrà avanti all'infito con il boss che di volta in volta si rigenererà
+- il gioco andrà avanti all'infito con il boss che di volta in volta si rigenererà
+- alla morte di un nemico verrà lasciato a terra uno fra tre drop: il doblone darà un doblone al giocatore, la freccia darà al giocatore tre munizioni (raccoglibile solo se si ha equipaggiata un'arma che usa munizioni), la pozione curerà la vita del giocatore
+- sparsi per la mappa ci sono 100 power up, che il giocatore può raccogliere, di tre tipi: il martello ripara l'arma del giocatore (raccoglibile solo se l'arma equipaggiata ha una durabilità), la saetta aumenterà la velocità del giocatore per 10 secondi, l'icona della spada aumenterà per 10 secondi il danno inflitto
